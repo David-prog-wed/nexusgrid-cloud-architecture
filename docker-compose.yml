@@ -1,0 +1,49 @@
+services:
+  worker-node-1:
+    build: ./worker
+    container_name: worker-node-1
+    restart: always
+    environment:
+      - NODE_ID=worker-node-1
+      - NODE_PORT=8001
+      - MAX_THREADS=8
+    networks:
+      - nexusgrid_net
+
+  worker-node-2:
+    build: ./worker
+    container_name: worker-node-2
+    restart: always
+    environment:
+      - NODE_ID=worker-node-2
+      - NODE_PORT=8002
+      - MAX_THREADS=8
+    networks:
+      - nexusgrid_net
+
+  coordinator-node:
+    build: ./coordinator
+    container_name: coordinator-node
+    restart: always
+    environment:
+      - WORKER_NODES=http://worker-node-1:8001,http://worker-node-2:8002
+    depends_on:
+      - worker-node-1
+      - worker-node-2
+    networks:
+      - nexusgrid_net
+
+  nexus-gateway:
+    build: ./frontend
+    container_name: nexus-gateway
+    restart: always
+    ports:
+      - "127.0.0.1:8086:80"
+    depends_on:
+      - coordinator-node
+    networks:
+      - nexusgrid_net
+
+networks:
+  nexusgrid_net:
+    driver: bridge
