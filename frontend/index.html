@@ -1,160 +1,179 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NexusGrid Cloud | Arquitectura Distribuida entre Hilos y Nodos</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusGrid Cloud | Arquitectura Distribuida entre Hilos y Nodos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-
 <body class="bg-slate-950 text-slate-100 min-h-screen p-6">
-  <div class="max-w-6xl mx-auto space-y-6">
-    <!-- Header -->
-    <header
-      class="flex flex-col md:flex-row justify-between items-center bg-slate-900 p-5 rounded-xl border border-slate-800 shadow-lg">
-      <div>
-        <h1 class="text-2xl font-bold text-cyan-400">🕸️ NexusGrid Cloud</h1>
-        <p class="text-sm text-slate-400">Arquitectura Distribuida Multinodo y Multihilo • Patrones Proxy, Mediator,
-          Observer y ThreadPool</p>
-      </div>
-      <div class="flex items-center gap-3 mt-3 md:mt-0">
-        <span id="cluster-badge"
-          class="px-3 py-1 text-xs font-semibold rounded-full bg-emerald-950 text-emerald-300 border border-emerald-700">
-          ● Clúster Activo: 2 Nodos Workers
-        </span>
-        <a href="/docs" target="_blank"
-          class="px-3 py-1 text-xs bg-cyan-600 hover:bg-cyan-500 rounded-lg font-medium transition">
-          Swagger / OpenAPI ↗
-        </a>
-      </div>
-    </header>
-
-    <!-- Métricas de Rendimiento en Tiempo Real -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
-        <p class="text-xs text-slate-400 uppercase">Tiempo Secuencial (1 Hilo)</p>
-        <p id="m-seq" class="text-2xl font-bold text-rose-400">0 ms</p>
-      </div>
-      <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
-        <p class="text-xs text-slate-400 uppercase">Tiempo Distribuido Real</p>
-        <p id="m-dist" class="text-2xl font-bold text-emerald-400">0 ms</p>
-      </div>
-      <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
-        <p class="text-xs text-slate-400 uppercase">Aceleración (Speedup)</p>
-        <p id="m-speedup" class="text-2xl font-bold text-cyan-400">1.0x</p>
-      </div>
-      <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
-        <p class="text-xs text-slate-400 uppercase">Throughput del Clúster</p>
-        <p id="m-tput" class="text-2xl font-bold text-amber-400">0 tareas/s</p>
-      </div>
-    </div>
-
-    <!-- Panel de Control y Matriz de Hilos -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- Configurador de Lote -->
-      <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 space-y-4 h-fit">
-        <h2 class="text-lg font-semibold text-slate-200">Simulador de Carga Distribuida</h2>
-        <form id="dispatch-form" class="space-y-4">
-          <div>
-            <label class="text-xs text-slate-400">Tamaño del Lote (Tareas Concurrentes)</label>
-            <input type="number" id="total_tasks" value="16" min="4" max="48"
-              class="w-full mt-1 p-2.5 rounded-lg bg-slate-950 border border-slate-700 text-sm">
-          </div>
-          <div class="grid grid-cols-2 gap-3">
+    <div class="max-w-6xl mx-auto space-y-6">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-center bg-slate-900 p-5 rounded-xl border border-slate-800 shadow-lg">
             <div>
-              <label class="text-xs text-slate-400">Nodos Workers Activos</label>
-              <select id="active_nodes"
-                class="w-full mt-1 p-2.5 rounded-lg bg-slate-950 border border-slate-700 text-sm">
-                <option value="2">2 Nodos (Clúster Completo)</option>
-                <option value="1">1 Nodo (Simular Caída/Failover)</option>
-              </select>
+                <h1 class="text-2xl font-bold text-cyan-400">🕸️ NexusGrid Cloud</h1>
+                <p class="text-sm text-slate-400">Arquitectura Distribuida Multinodo y Multihilo • Patrones Proxy, Mediator, Observer y ThreadPool</p>
             </div>
-            <div>
-              <label class="text-xs text-slate-400">Hilos por Nodo (ThreadPool)</label>
-              <select id="threads_per_node"
-                class="w-full mt-1 p-2.5 rounded-lg bg-slate-950 border border-slate-700 text-sm">
-                <option value="1">1 Hilo (Secuencial)</option>
-                <option value="2">2 Hilos por Nodo</option>
-                <option value="4" selected>4 Hilos por Nodo (Óptimo)</option>
-                <option value="8">8 Hilos por Nodo</option>
-              </select>
+            <div class="flex items-center gap-3 mt-3 md:mt-0">
+                <span id="cluster-badge" class="px-3 py-1 text-xs font-semibold rounded-full bg-emerald-950 text-emerald-300 border border-emerald-700">
+                    ● Clúster Activo: 2 Nodos Workers
+                </span>
+                <a href="/docs" target="_blank" class="px-3 py-1 text-xs bg-cyan-600 hover:bg-cyan-500 rounded-lg font-medium transition">
+                    Swagger / OpenAPI ↗
+                </a>
             </div>
-          </div>
-          <div>
-            <label class="text-xs text-slate-400">Complejidad por Tarea (ms)</label>
-            <input type="number" id="task_load" value="120" min="50" max="300"
-              class="w-full mt-1 p-2.5 rounded-lg bg-slate-950 border border-slate-700 text-sm">
-          </div>
-          <button type="submit" id="btn-run"
-            class="w-full py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white font-semibold rounded-lg transition shadow-md">
-            ⚡ Despachar Lote en Nodos e Hilos
-          </button>
-        </form>
+        </header>
 
-        <!-- Estado de Nodos (Observer) -->
-        <div class="pt-4 border-t border-slate-800">
-          <h3 class="text-xs font-semibold uppercase text-slate-400 mb-2">Estado de Nodos en Red (Observer)</h3>
-          <div id="nodes-list" class="space-y-2 text-xs"></div>
+        <!-- Banner Dinámico de Alerta de Failover / Estado del Clúster -->
+        <div id="failover-alert-box" class="hidden p-4 rounded-xl font-medium border text-sm transition-all duration-300"></div>
+
+        <!-- Métricas de Rendimiento en Tiempo Real -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                <p class="text-xs text-slate-400 uppercase">Tiempo Secuencial (1 Hilo)</p>
+                <p id="m-seq" class="text-2xl font-bold text-rose-400">0 ms</p>
+            </div>
+            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                <p class="text-xs text-slate-400 uppercase">Tiempo Distribuido Real</p>
+                <p id="m-dist" class="text-2xl font-bold text-emerald-400">0 ms</p>
+            </div>
+            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                <p class="text-xs text-slate-400 uppercase">Aceleración (Speedup)</p>
+                <p id="m-speedup" class="text-2xl font-bold text-cyan-400">1.0x</p>
+            </div>
+            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                <p class="text-xs text-slate-400 uppercase">Throughput del Clúster</p>
+                <p id="m-tput" class="text-2xl font-bold text-amber-400">0 tareas/s</p>
+            </div>
         </div>
-      </div>
 
-      <!-- Matriz Visual de Hilos y Nodos -->
-      <div class="lg:col-span-2 bg-slate-900 p-5 rounded-xl border border-slate-800">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-lg font-semibold text-slate-200">Trazabilidad de Ejecución por Nodo e Hilo</h2>
-          <span id="matrix-subtitle" class="text-xs text-slate-400">Mostrando asignación en tiempo real</span>
-        </div>
-        <div id="thread-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[460px] overflow-y-auto pr-1"></div>
-      </div>
-    </div>
-  </div>
+        <!-- Panel de Control y Matriz de Hilos -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Configurador de Lote -->
+            <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 space-y-4 h-fit">
+                <h2 class="text-lg font-semibold text-slate-200">Simulador de Carga Distribuida</h2>
+                <form id="dispatch-form" class="space-y-4">
+                    <div>
+                        <label class="text-xs text-slate-400">Tamaño del Lote (Tareas Concurrentes)</label>
+                        <input type="number" id="total_tasks" value="16" min="4" max="64"
+                            class="w-full mt-1 p-2.5 rounded-lg bg-slate-950 border border-slate-700 text-sm">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-xs text-slate-400">Nodos Workers Activos</label>
+                            <select id="active_nodes" class="w-full mt-1 p-2.5 rounded-lg bg-slate-950 border border-slate-700 text-sm">
+                                <option value="2">2 Nodos (Clúster Completo)</option>
+                                <option value="1">1 Nodo (Simular Caída/Failover)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-400">Hilos por Nodo (ThreadPool)</label>
+                            <select id="threads_per_node" class="w-full mt-1 p-2.5 rounded-lg bg-slate-950 border border-slate-700 text-sm">
+                                <option value="1">1 Hilo (Secuencial)</option>
+                                <option value="2">2 Hilos por Nodo</option>
+                                <option value="4" selected>4 Hilos por Nodo (Óptimo)</option>
+                                <option value="8">8 Hilos por Nodo</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-400">Complejidad por Tarea (ms)</label>
+                        <input type="number" id="task_load" value="120" min="50" max="500"
+                            class="w-full mt-1 p-2.5 rounded-lg bg-slate-950 border border-slate-700 text-sm">
+                    </div>
+                    <button type="submit" id="btn-run" class="w-full py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white font-semibold rounded-lg transition shadow-md">
+                        ⚡ Despachar Lote en Nodos e Hilos
+                    </button>
+                </form>
 
-  <script>
-    async function loadStatus() {
-      const res = await fetch('/api/v1/cluster-status');
-      const data = await res.json();
-      document.getElementById('nodes-list').innerHTML = data.nodes.map(n => `
-                <div class="flex justify-between items-center p-2.5 rounded-lg bg-slate-950 border border-slate-800">
-                    <span class="font-mono text-cyan-300">${n.node_id}</span>
-                    <span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-700">${n.status} (Max ${n.max_threads} Hilos)</span>
+                <!-- Estado de Nodos (Observer) -->
+                <div class="pt-4 border-t border-slate-800">
+                    <h3 class="text-xs font-semibold uppercase text-slate-400 mb-2">Estado de Nodos en Red (Observer)</h3>
+                    <div id="nodes-list" class="space-y-2 text-xs"></div>
                 </div>
-            `).join('');
-    }
+            </div>
 
-    async function runBatch(e) {
-      if (e) e.preventDefault();
-      const btn = document.getElementById('btn-run');
-      btn.textContent = '⏳ Procesando en Clúster...';
-      btn.disabled = true;
+            <!-- Matriz Visual de Hilos y Nodos -->
+            <div class="lg:col-span-2 bg-slate-900 p-5 rounded-xl border border-slate-800">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold text-slate-200">Trazabilidad de Ejecución por Nodo e Hilo</h2>
+                    <span id="matrix-subtitle" class="text-xs text-slate-400">Mostrando asignación en tiempo real</span>
+                </div>
+                <div id="thread-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[460px] overflow-y-auto pr-1"></div>
+            </div>
+        </div>
+    </div>
 
-      const payload = {
-        total_tasks: parseInt(document.getElementById('total_tasks').value),
-        active_nodes_limit: parseInt(document.getElementById('active_nodes').value),
-        threads_per_node: parseInt(document.getElementById('threads_per_node').value),
-        task_load_ms: parseInt(document.getElementById('task_load').value)
-      };
+    <script>
+        async function loadStatus() {
+            const simLimit = document.getElementById('active_nodes').value;
+            const res = await fetch(`/api/v1/cluster-status?simulated_limit=${simLimit}`);
+            const data = await res.json();
 
-      const res = await fetch('/api/v1/dispatch', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      const s = data.summary;
+            const badge = document.getElementById('cluster-badge');
+            if (data.failover_active) {
+                badge.textContent = `⚠️ MODO FAILOVER: ${data.online_nodes}/${data.registered_nodes} Nodo Activo`;
+                badge.className = 'px-3 py-1 text-xs font-semibold rounded-full bg-rose-950 text-rose-300 border border-rose-600 animate-pulse';
+            } else {
+                badge.textContent = `● Clúster Activo: ${data.online_nodes} Nodos Workers`;
+                badge.className = 'px-3 py-1 text-xs font-semibold rounded-full bg-emerald-950 text-emerald-300 border border-emerald-700';
+            }
 
-      document.getElementById('m-seq').textContent = `${s.sequential_estimated_ms} ms`;
-      document.getElementById('m-dist').textContent = `${s.distributed_actual_ms} ms`;
-      document.getElementById('m-speedup').textContent = `${s.speedup_factor}x`;
-      document.getElementById('m-tput').textContent = `${s.throughput_tasks_sec} tareas/s`;
-      document.getElementById('matrix-subtitle').textContent = `${s.nodes_used} Nodo(s) × ${s.threads_per_node} Hilo(s) = ${s.total_threads_cluster} Hilos Concurrentes`;
+            document.getElementById('nodes-list').innerHTML = data.nodes.map(n => {
+                const isOnline = n.status === 'ONLINE';
+                const statusBadge = isOnline
+                    ? `<span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-700">ONLINE (Max ${n.max_threads} Hilos)</span>`
+                    : `<span class="px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-600 font-semibold">${n.status}</span>`;
+                return `
+                    <div class="flex justify-between items-center p-2.5 rounded-lg bg-slate-950 border ${isOnline ? 'border-slate-800' : 'border-rose-800/80'}">
+                        <span class="font-mono ${isOnline ? 'text-cyan-300' : 'text-rose-400 line-through'}">${n.node_id}</span>
+                        ${statusBadge}
+                    </div>
+                `;
+            }).join('');
+        }
 
-      document.getElementById('thread-grid').innerHTML = data.execution_matrix.map(t => {
-        const isNode1 = t.node_id.includes('1');
-        const badgeClass = isNode1
-          ? 'bg-cyan-950 text-cyan-300 border-cyan-700'
-          : 'bg-amber-950 text-amber-300 border-amber-700';
-        return `
+        async function runBatch(e) {
+            if (e) e.preventDefault();
+            const btn = document.getElementById('btn-run');
+            btn.textContent = '⏳ Procesando en Clúster...';
+            btn.disabled = true;
+
+            const payload = {
+                total_tasks: parseInt(document.getElementById('total_tasks').value),
+                active_nodes_limit: parseInt(document.getElementById('active_nodes').value),
+                threads_per_node: parseInt(document.getElementById('threads_per_node').value),
+                task_load_ms: parseInt(document.getElementById('task_load').value)
+            };
+
+            const res = await fetch('/api/v1/dispatch', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            const s = data.summary;
+
+            document.getElementById('m-seq').textContent = `${s.sequential_estimated_ms} ms`;
+            document.getElementById('m-dist').textContent = `${s.distributed_actual_ms} ms`;
+            document.getElementById('m-speedup').textContent = `${s.speedup_factor}x`;
+            document.getElementById('m-tput').textContent = `${s.throughput_tasks_sec} tareas/s`;
+            document.getElementById('matrix-subtitle').textContent = `${s.nodes_used} Nodo(s) × ${s.threads_per_node} Hilo(s) = ${s.total_threads_cluster} Hilos Concurrentes`;
+
+            // Mostrar Banner de Alerta de Failover o Estado Saludable
+            const alertBox = document.getElementById('failover-alert-box');
+            alertBox.classList.remove('hidden');
+            alertBox.textContent = s.alert_message;
+            alertBox.className = s.failover_alert
+                ? 'p-4 rounded-xl font-medium border bg-rose-950/80 border-rose-600 text-rose-200 shadow-lg'
+                : 'p-4 rounded-xl font-medium border bg-emerald-950/50 border-emerald-700 text-emerald-300';
+
+            document.getElementById('thread-grid').innerHTML = data.execution_matrix.map(t => {
+                const isNode1 = t.node_id.includes('1');
+                const badgeClass = isNode1
+                    ? 'bg-cyan-950 text-cyan-300 border-cyan-700'
+                    : 'bg-amber-950 text-amber-300 border-amber-700';
+                return `
                     <div class="p-3 rounded-lg bg-slate-950 border border-slate-800 flex justify-between items-center text-xs">
                         <div>
                             <p class="font-bold text-slate-200">Tarea #${t.task_id} <span class="font-mono text-slate-500">(${t.hash_signature})</span></p>
@@ -166,17 +185,17 @@
                         </div>
                     </div>
                 `;
-      }).join('');
+            }).join('');
 
-      btn.textContent = '⚡ Despachar Lote en Nodos e Hilos';
-      btn.disabled = false;
-      loadStatus();
-    }
+            btn.textContent = '⚡ Despachar Lote en Nodos e Hilos';
+            btn.disabled = false;
+            loadStatus();
+        }
 
-    document.getElementById('dispatch-form').addEventListener('submit', runBatch);
-    loadStatus();
-    runBatch();
-  </script>
+        document.getElementById('dispatch-form').addEventListener('submit', runBatch);
+        document.getElementById('active_nodes').addEventListener('change', runBatch);
+        loadStatus();
+        runBatch();
+    </script>
 </body>
-
 </html>
